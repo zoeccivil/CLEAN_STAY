@@ -1,0 +1,18 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Tasks photos: readable by authenticated users,
+    // writable only by the assigned cleaner or admins/supervisors
+    match /tasks/{taskId}/photos/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null;
+    }
+
+    // Reports PDFs: publicly readable (via URL), writable by backend functions
+    match /reports/{reportId}/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+  }
+}

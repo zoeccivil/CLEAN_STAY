@@ -1,0 +1,96 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper function to get user role
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.rol;
+    }
+
+    // ── Users ─────────────────────────────────────────────────────────────
+    match /users/{userId} {
+      allow read: if request.auth != null && (
+        request.auth.uid == userId ||
+        getUserRole() == 'admin' ||
+        getUserRole() == 'supervisor'
+      );
+      allow create: if request.auth != null && getUserRole() == 'admin';
+      allow update: if request.auth != null && (
+        getUserRole() == 'admin' ||
+        request.auth.uid == userId
+      );
+      allow delete: if request.auth != null && getUserRole() == 'admin';
+    }
+
+    // ── Properties ────────────────────────────────────────────────────────
+    match /properties/{propertyId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && (
+        getUserRole() == 'admin' ||
+        getUserRole() == 'supervisor'
+      );
+    }
+
+    // ── Tasks ─────────────────────────────────────────────────────────────
+    match /tasks/{taskId} {
+      allow read: if request.auth != null && (
+        getUserRole() == 'admin' ||
+        getUserRole() == 'supervisor' ||
+        resource.data.assigned_cleaner_id == request.auth.uid
+      );
+      allow create: if request.auth != null && (
+        getUserRole() == 'admin' ||
+        getUserRole() == 'supervisor'
+      );
+      allow update: if request.auth != null && (
+        getUserRole() == 'admin' ||
+        getUserRole() == 'supervisor' ||
+        resource.data.assigned_cleaner_id == request.auth.uid
+      );
+      allow delete: if request.auth != null && getUserRole() == 'admin';
+
+      // Photos subcollection
+      match /photos/{photoId} {
+        allow read: if request.auth != null;
+        allow create: if request.auth != null && (
+          getUserRole() == 'admin' ||
+          getUserRole() == 'supervisor' ||
+          get(/databases/$(database)/documents/tasks/$(taskId)).data.assigned_cleaner_id == request.auth.uid
+        );
+        allow update, delete: if request.auth != null && (
+          getUserRole() == 'admin' ||
+          getUserRole() == 'supervisor'
+        );
+      }
+    }
+
+    // ── Reports ───────────────────────────────────────────────────────────
+    match /reports/{reportId} {
+      allow read: if true;  // Public access via secure ID link
+      allow create: if request.auth != null && (
+        getUserRole() == 'admin' ||
+        getUserRole() == 'supervisor'
+      );
+      allow update: if request.auth != null && (
+        getUserRole() == 'admin' ||
+        getUserRole() == 'supervisor'
+      );
+      allow delete: if request.auth != null && getUserRole() == 'admin';
+    }
+
+    // ── Maintenance ───────────────────────────────────────────────────────
+    match /maintenance/{issueId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null && (
+        getUserRole() == 'admin' ||
+        getUserRole() == 'supervisor' ||
+        getUserRole() == 'limpieza'
+      );
+      allow update: if request.auth != null && (
+        getUserRole() == 'admin' ||
+        getUserRole() == 'supervisor'
+      );
+      allow delete: if request.auth != null && getUserRole() == 'admin';
+    }
+  }
+}
