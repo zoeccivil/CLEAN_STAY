@@ -13,12 +13,16 @@ export function useRealtimeCollection(collectionName, filters = [], sortBy = nul
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Serialize filters/sortBy to primitive values for stable dependency comparison
+  const filtersKey = JSON.stringify(filters);
+
   useEffect(() => {
     if (!collectionName) return;
 
     setLoading(true);
+    const parsedFilters = JSON.parse(filtersKey);
     const constraints = [];
-    filters.forEach(([field, op, value]) => {
+    parsedFilters.forEach(([field, op, value]) => {
       constraints.push(where(field, op, value));
     });
     if (sortBy) {
@@ -44,8 +48,8 @@ export function useRealtimeCollection(collectionName, filters = [], sortBy = nul
     );
 
     return unsubscribe;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collectionName]);
+  }, [collectionName, filtersKey, sortBy]);
 
   return { documents, loading, error };
 }
+
