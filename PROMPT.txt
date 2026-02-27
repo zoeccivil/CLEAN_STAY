@@ -1,0 +1,89 @@
+PROMPT: Continuar configuración de CleanStay Pro
+CONTEXTO DEL PROYECTO
+CleanStay Pro es una plataforma de gestión de limpiezas para alquileres de corta estancia (Airbnb). Stack: React 19 + Vite 7 + Tailwind CSS v4 + Firebase (Firestore, Auth, Storage, Functions).
+
+Repositorio: CLEAN_STAY
+
+ESTADO ACTUAL (27 Feb 2026) - YA COMPLETADO ✅
+✅ Node.js instalado
+✅ npm install - dependencias del frontend
+✅ Firebase CLI instalado (npm install -g firebase-tools)
+✅ firebase login - autenticado con cuenta Google
+✅ Proyecto Firebase: cleanstay-pro seleccionado
+✅ functions/npm install - dependencias de Cloud Functions
+✅ Firestore rules y indexes desplegados
+✅ Storage rules desplegadas
+✅ Usuario admin creado: servicios@zoeccivil.com con rol admin
+✅ App funcionando en http://localhost:5173
+PENDIENTE POR HACER 🔧
+1. DESPLEGAR CLOUD FUNCTIONS (PDFs + Email automático)
+# Configurar credenciales de email para Nodemailer
+npx firebase-tools functions:config:set email.user="tu-email@gmail.com" email.password="tu-app-password"
+
+# Desplegar functions
+npx firebase-tools deploy --only functions
+
+Nota: Necesitas un App Password de Gmail (no la contraseña normal). Crear en: https://myaccount.google.com/apppasswords
+
+2. PROBAR FUNCIONALIDADES DEL SISTEMA
+ Propiedades: Crear propiedades de Airbnb (nombre, dirección, propietario, email)
+ Personal: Crear usuarios supervisor y limpieza desde la app
+ Tareas: Crear tareas de limpieza asignadas a propiedades y personal
+ Reportes: Verificar generación de reportes con fotos y checklist
+ Mantenimiento: Probar registro de incidencias
+3. PROBAR PWA MÓVIL
+Abrir la app desde un celular
+Verificar que usuarios con rol limpieza solo ven sus tareas del día
+Probar "Agregar a pantalla de inicio"
+4. DESPLEGAR A PRODUCCIÓN (HOSTING)
+
+npm run build
+npx firebase-tools deploy --only hosting
+
+
+5. CONFIGURACIÓN OPCIONAL AVANZADA
+Configurar dominio personalizado en Firebase Hosting
+Activar Cloud Functions en región específica si hay latencia
+Configurar alertas de Firebase para monitoreo
+ESTRUCTURA DE DATOS EN FIRESTORE
+Colecciones:
+
+users - Usuarios del sistema (uid, nombre, email, rol, telefono, activo)
+properties - Propiedades (nombre, direccion, propietario, emailPropietario)
+tasks - Tareas de limpieza (propiedadId, asignadoA, fecha, tipo, estado)
+reports - Reportes generados (tareaId, propiedadId, fotos, checklist, pdfUrl)
+maintenance - Incidencias de mantenimiento
+Roles de usuario:
+
+admin - Acceso total
+supervisor - Gestión operativa (sin gestión de usuarios)
+limpieza - Solo PWA móvil con tareas asignadas
+COMANDOS ÚTILES
+
+# Arrancar desarrollo
+npm run dev
+
+# Ver proyectos Firebase
+npx firebase-tools projects:list
+
+# Desplegar todo
+npx firebase-tools deploy
+
+# Solo hosting
+npx firebase-tools deploy --only hosting
+
+# Solo functions
+npx firebase-tools deploy --only functions
+
+# Ver logs de functions
+npx firebase-tools functions:log
+
+
+
+ARCHIVOS CLAVE
+App.jsx - Rutas y layout principal
+useAuth.js - Autenticación y contexto de usuario
+useFirestore.js - Operaciones CRUD
+index.js - Cloud Functions (PDF + email)
+firestore.rules - Reglas de seguridad
+.env - Variables de entorno (no commitear)
