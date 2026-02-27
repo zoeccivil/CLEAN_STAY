@@ -15,7 +15,7 @@ const storage = admin.storage();
 // Helper: Create email transporter
 // ============================================================
 function createTransporter() {
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: functions.config().email.user,
